@@ -65,9 +65,10 @@ class TestFactoryFunctions:
 
     def test_create_llm_client_openai(self):
         """Test creating OpenAI LLM client."""
-        with patch("email_labeler.factory.OPENAI_API_KEY", "test-key"), patch(
-            "email_labeler.factory.OpenAI"
-        ) as mock_openai:
+        with (
+            patch("email_labeler.factory.OPENAI_API_KEY", "test-key"),
+            patch("email_labeler.factory.OpenAI") as mock_openai,
+        ):
             mock_client = MagicMock()
             mock_openai.return_value = mock_client
 
@@ -78,9 +79,11 @@ class TestFactoryFunctions:
 
     def test_create_llm_client_ollama(self):
         """Test creating Ollama LLM client."""
-        with patch("email_labeler.factory.LLM_SERVICE", "Ollama"), patch(
-            "email_labeler.factory.OLLAMA_BASE_URL", "http://localhost:11434/v1"
-        ), patch("email_labeler.factory.OpenAI") as mock_openai:
+        with (
+            patch("email_labeler.factory.LLM_SERVICE", "Ollama"),
+            patch("email_labeler.factory.OLLAMA_BASE_URL", "http://localhost:11434/v1"),
+            patch("email_labeler.factory.OpenAI") as mock_openai,
+        ):
             mock_client = MagicMock()
             mock_openai.return_value = mock_client
 
@@ -93,9 +96,10 @@ class TestFactoryFunctions:
 
     def test_create_llm_client_invalid_service(self):
         """Test creating LLM client with invalid service defaults to OpenAI."""
-        with patch("email_labeler.factory.OPENAI_API_KEY", "test-key"), patch(
-            "email_labeler.factory.OpenAI"
-        ) as mock_openai:
+        with (
+            patch("email_labeler.factory.OPENAI_API_KEY", "test-key"),
+            patch("email_labeler.factory.OpenAI") as mock_openai,
+        ):
             mock_client = MagicMock()
             mock_openai.return_value = mock_client
 
@@ -172,8 +176,9 @@ class TestFactoryFunctions:
             mock_client = MagicMock()
             mock_create_client.return_value = mock_client
 
-            with patch("email_labeler.factory.OPENAI_MODEL", "gpt-3.5-turbo"), patch(
-                "email_labeler.factory.LLM_SERVICE", "OpenAI"
+            with (
+                patch("email_labeler.factory.OPENAI_MODEL", "gpt-3.5-turbo"),
+                patch("email_labeler.factory.LLM_SERVICE", "OpenAI"),
             ):
                 service = create_llm_service(categories=test_categories)
 
@@ -210,11 +215,11 @@ class TestFactoryFunctions:
 
         test_categories = ["Work", "Personal", "Other"]
 
-        with patch("email_labeler.factory.create_email_database") as mock_create_db, patch(
-            "email_labeler.factory.create_email_processor"
-        ) as mock_create_processor, patch(
-            "email_labeler.factory.create_llm_service"
-        ) as mock_create_llm:
+        with (
+            patch("email_labeler.factory.create_email_database") as mock_create_db,
+            patch("email_labeler.factory.create_email_processor") as mock_create_processor,
+            patch("email_labeler.factory.create_llm_service") as mock_create_llm,
+        ):
             mock_database = MagicMock()
             mock_processor = MagicMock()
             mock_llm_service = MagicMock()
@@ -235,9 +240,10 @@ class TestFactoryFunctions:
 
     def test_create_test_dependencies(self):
         """Test creating test dependencies."""
-        with patch("email_labeler.factory.create_llm_client") as mock_create_client, patch(
-            "email_labeler.email_processor.get_gmail_client"
-        ) as mock_get_gmail:
+        with (
+            patch("email_labeler.factory.create_llm_client") as mock_create_client,
+            patch("email_labeler.email_processor.get_gmail_client") as mock_get_gmail,
+        ):
             mock_client = MagicMock()
             mock_gmail_client = MagicMock()
             mock_create_client.return_value = mock_client
@@ -257,9 +263,10 @@ class TestFactoryFunctions:
 
     def test_create_test_dependencies_with_in_memory_db(self):
         """Test that create_test_dependencies uses in-memory database."""
-        with patch("email_labeler.factory.create_llm_client") as mock_create_client, patch(
-            "email_labeler.email_processor.get_gmail_client"
-        ) as mock_get_gmail:
+        with (
+            patch("email_labeler.factory.create_llm_client") as mock_create_client,
+            patch("email_labeler.email_processor.get_gmail_client") as mock_get_gmail,
+        ):
             mock_client = MagicMock()
             mock_gmail_client = MagicMock()
             mock_create_client.return_value = mock_client

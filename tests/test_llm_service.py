@@ -32,11 +32,12 @@ class TestLLMService:
 
     def test_init_without_client_openai(self):
         """Test initialization without client for OpenAI."""
-        with patch("email_labeler.llm_service.LLM_SERVICE", "OpenAI"), patch(
-            "email_labeler.llm_service.OPENAI_API_KEY", "test-key"
-        ), patch("email_labeler.llm_service.OPENAI_MODEL", "gpt-3.5-turbo"), patch(
-            "email_labeler.llm_service.OpenAI"
-        ) as mock_openai:
+        with (
+            patch("email_labeler.llm_service.LLM_SERVICE", "OpenAI"),
+            patch("email_labeler.llm_service.OPENAI_API_KEY", "test-key"),
+            patch("email_labeler.llm_service.OPENAI_MODEL", "gpt-3.5-turbo"),
+            patch("email_labeler.llm_service.OpenAI") as mock_openai,
+        ):
             service = LLMService(
                 categories=TEST_CATEGORIES, max_content_length=TEST_MAX_CONTENT_LENGTH
             )
@@ -46,11 +47,12 @@ class TestLLMService:
 
     def test_init_without_client_ollama(self):
         """Test initialization without client for Ollama."""
-        with patch("email_labeler.llm_service.LLM_SERVICE", "Ollama"), patch(
-            "email_labeler.llm_service.OLLAMA_BASE_URL", "http://localhost:11434/v1"
-        ), patch("email_labeler.llm_service.OLLAMA_MODEL", "llama2"), patch(
-            "email_labeler.llm_service.OpenAI"
-        ) as mock_openai:
+        with (
+            patch("email_labeler.llm_service.LLM_SERVICE", "Ollama"),
+            patch("email_labeler.llm_service.OLLAMA_BASE_URL", "http://localhost:11434/v1"),
+            patch("email_labeler.llm_service.OLLAMA_MODEL", "llama2"),
+            patch("email_labeler.llm_service.OpenAI") as mock_openai,
+        ):
             service = LLMService(
                 categories=TEST_CATEGORIES, max_content_length=TEST_MAX_CONTENT_LENGTH
             )
@@ -179,9 +181,11 @@ class TestLLMService:
 
     def test_get_llm_client_openai(self):
         """Test getting OpenAI client."""
-        with patch("email_labeler.llm_service.LLM_SERVICE", "OpenAI"), patch(
-            "email_labeler.llm_service.OPENAI_API_KEY", "test-key"
-        ), patch("email_labeler.llm_service.OpenAI") as mock_openai:
+        with (
+            patch("email_labeler.llm_service.LLM_SERVICE", "OpenAI"),
+            patch("email_labeler.llm_service.OPENAI_API_KEY", "test-key"),
+            patch("email_labeler.llm_service.OpenAI") as mock_openai,
+        ):
             service = LLMService(
                 categories=TEST_CATEGORIES, max_content_length=TEST_MAX_CONTENT_LENGTH
             )
@@ -191,9 +195,11 @@ class TestLLMService:
 
     def test_get_llm_client_ollama(self):
         """Test getting Ollama client."""
-        with patch("email_labeler.llm_service.LLM_SERVICE", "Ollama"), patch(
-            "email_labeler.llm_service.OLLAMA_BASE_URL", "http://localhost:11434/v1"
-        ), patch("email_labeler.llm_service.OpenAI") as mock_openai:
+        with (
+            patch("email_labeler.llm_service.LLM_SERVICE", "Ollama"),
+            patch("email_labeler.llm_service.OLLAMA_BASE_URL", "http://localhost:11434/v1"),
+            patch("email_labeler.llm_service.OpenAI") as mock_openai,
+        ):
             service = LLMService(
                 categories=TEST_CATEGORIES, max_content_length=TEST_MAX_CONTENT_LENGTH
             )
@@ -239,8 +245,9 @@ class TestLLMService:
             json.dumps(expected_response)
         )
 
-        with patch("email_labeler.llm_service.LLM_SERVICE", "Ollama"), patch(
-            "email_labeler.llm_service.GPT_OSS_REASONING", "medium"
+        with (
+            patch("email_labeler.llm_service.LLM_SERVICE", "Ollama"),
+            patch("email_labeler.llm_service.GPT_OSS_REASONING", "medium"),
         ):
             # Create LLMService with mocked client - use a gpt-oss model to trigger reasoning
             llm_service = LLMService(
@@ -290,8 +297,9 @@ class TestLLMService:
             model="gpt-3.5-turbo",
         )
 
-        with patch("builtins.open", create=True) as mock_open, patch(
-            "email_labeler.llm_service.LLM_LOG_FILE", "/tmp/test.log"
+        with (
+            patch("builtins.open", create=True) as mock_open,
+            patch("email_labeler.llm_service.LLM_LOG_FILE", "/tmp/test.log"),
         ):
             # Test the _log_interaction method
             llm_service._log_interaction(1.0, 2.5, '{"category": "Work"}')
@@ -357,9 +365,11 @@ class TestLLMService:
     def test_unsupported_service_fallback(self):
         """Test handling of unsupported service configurations."""
         # The actual implementation doesn't validate service type, it just defaults to OpenAI
-        with patch("email_labeler.llm_service.LLM_SERVICE", "UnsupportedService"), patch(
-            "email_labeler.llm_service.OPENAI_API_KEY", "test-key"
-        ), patch("email_labeler.llm_service.OpenAI") as mock_openai:
+        with (
+            patch("email_labeler.llm_service.LLM_SERVICE", "UnsupportedService"),
+            patch("email_labeler.llm_service.OPENAI_API_KEY", "test-key"),
+            patch("email_labeler.llm_service.OpenAI") as mock_openai,
+        ):
             LLMService(categories=TEST_CATEGORIES, max_content_length=TEST_MAX_CONTENT_LENGTH)
             # Should fall through to OpenAI case since it's not "Ollama"
             mock_openai.assert_called_with(api_key="test-key")
