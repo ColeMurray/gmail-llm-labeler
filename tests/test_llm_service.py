@@ -317,7 +317,7 @@ class TestLLMService:
         from openai import APITimeoutError
 
         email_content = "Test email"
-        mock_openai_client.chat.completions.create.side_effect = APITimeoutError("Request Timeout")
+        mock_openai_client.chat.completions.create.side_effect = APITimeoutError("Request Timeout")  # type: ignore[arg-type]
 
         # Create LLMService with mocked client
         llm_service = LLMService(

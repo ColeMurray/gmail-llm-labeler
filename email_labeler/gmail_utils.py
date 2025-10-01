@@ -33,7 +33,7 @@ logger = logging.getLogger(__name__)
 def get_gmail_client(
     token_file: str = TOKEN_FILE,
     credentials_file: str = CREDENTIALS_FILE,
-    scopes: List[str] = None,
+    scopes: Optional[List[str]] = None,
     port: int = 0,
 ) -> Resource:
     """
@@ -93,9 +93,9 @@ def get_gmail_client(
 
 def fetch_emails(
     gmail: Resource,
-    query: str = None,
-    max_results: int = None,
-    page_token: str = None,
+    query: Optional[str] = None,
+    max_results: Optional[int] = None,
+    page_token: Optional[str] = None,
     include_spam_trash: bool = False,
 ) -> List[dict]:
     """
@@ -135,7 +135,7 @@ def fetch_emails(
                 messages.extend(results.get("messages", []))
 
         logger.info(f"Fetched {len(messages)} emails with query: {query}")
-        return messages
+        return messages  # type: ignore[no-any-return]
 
     except HttpError as error:
         logger.error(f"Failed to fetch emails: {error}")
@@ -186,7 +186,10 @@ def parse_email_body(message_payload: dict) -> str:
 
 
 def get_email_content(
-    gmail: Resource, email_id: str, format: str = "full", metadata_headers: List[str] = None
+    gmail: Resource,
+    email_id: str,
+    format: str = "full",
+    metadata_headers: Optional[List[str]] = None,
 ) -> Dict[str, Union[str, List[str]]]:
     """
     Retrieves the complete content of an email including headers and body.
@@ -214,7 +217,7 @@ def get_email_content(
         request_params = {"userId": "me", "id": email_id, "format": format}
 
         if metadata_headers and format == "metadata":
-            request_params["metadataHeaders"] = metadata_headers
+            request_params["metadataHeaders"] = metadata_headers  # type: ignore[assignment]
 
         message = gmail.users().messages().get(**request_params).execute()
 
@@ -276,7 +279,7 @@ def get_or_create_label(
         for label in labels:
             if label["name"] == label_name:
                 logger.debug(f"Found existing label: {label_name} (ID: {label['id']})")
-                return label["id"]
+                return label["id"]  # type: ignore[no-any-return]
 
         # Label doesn't exist, create it
         label_object = {
@@ -288,7 +291,7 @@ def get_or_create_label(
         created_label = gmail.users().labels().create(userId="me", body=label_object).execute()
 
         logger.info(f"Created new label: {label_name} (ID: {created_label['id']})")
-        return created_label["id"]
+        return created_label["id"]  # type: ignore[no-any-return]
 
     except HttpError as error:
         logger.error(f"Failed to get or create label '{label_name}': {error}")
@@ -296,7 +299,10 @@ def get_or_create_label(
 
 
 def add_labels_to_email(
-    gmail: Resource, email_id: str, label_ids: List[str], remove_label_ids: List[str] = None
+    gmail: Resource,
+    email_id: str,
+    label_ids: List[str],
+    remove_label_ids: Optional[List[str]] = None,
 ) -> bool:
     """
     Adds (and optionally removes) labels from an email.
@@ -379,8 +385,8 @@ def mark_as_unread(gmail: Resource, email_id: str) -> bool:
 def batch_modify_messages(
     gmail: Resource,
     message_ids: List[str],
-    add_label_ids: List[str] = None,
-    remove_label_ids: List[str] = None,
+    add_label_ids: Optional[List[str]] = None,
+    remove_label_ids: Optional[List[str]] = None,
 ) -> bool:
     """
     Batch modifies multiple messages at once (more efficient for bulk operations).

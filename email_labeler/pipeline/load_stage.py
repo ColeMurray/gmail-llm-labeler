@@ -2,7 +2,7 @@
 
 import logging
 from datetime import datetime
-from typing import Dict, List
+from typing import Any, Dict, List, Optional
 
 from ..email_processor import EmailProcessor
 from ..gmail_utils import add_labels_to_email, mark_as_read
@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 class LoadStage(PipelineStage):
     """Handles applying categorization results to Gmail."""
 
-    def __init__(self, config: LoadConfig, email_processor: EmailProcessor = None):
+    def __init__(self, config: LoadConfig, email_processor: Optional[EmailProcessor] = None):
         """Initialize the load stage.
 
         Args:
@@ -107,8 +107,12 @@ class LoadStage(PipelineStage):
             if category not in self._label_cache:
                 try:
                     label_id = self.email_processor.get_or_create_label(category)
-                    self._label_cache[category] = label_id
-                    logger.debug(f"Cached label '{category}': {label_id}")
+                    if label_id is not None:
+                        self._label_cache[category] = label_id
+                        logger.debug(f"Cached label '{category}': {label_id}")
+                    else:
+                        logger.error(f"Failed to create label '{category}': returned None")
+                        context.add_error(f"Failed to create label '{category}': returned None")
                 except Exception as e:
                     logger.error(f"Failed to create label '{category}': {e}")
                     context.add_error(f"Failed to create label '{category}': {str(e)}")
@@ -195,6 +199,9 @@ class LoadStage(PipelineStage):
             # Try to get or create label
             try:
                 label_id = self.email_processor.get_or_create_label(email.category)
+                if label_id is None:
+                    logger.error(f"Failed to get label for '{email.category}': returned None")
+                    return False
                 self._label_cache[email.category] = label_id
             except Exception as e:
                 logger.error(f"Failed to get label for '{email.category}': {e}")
@@ -218,7 +225,7 @@ class LoadStage(PipelineStage):
 
     def _count_actions(self, results: List[ActionResult]) -> Dict[str, int]:
         """Count the number of each action type applied."""
-        action_counts = {}
+        action_counts: Dict[str, int] = {}
         for result in results:
             for action in result.actions_taken:
                 # Remove preview/dry-run prefixes for counting
@@ -226,7 +233,7 @@ class LoadStage(PipelineStage):
                 action_counts[clean_action] = action_counts.get(clean_action, 0) + 1
         return action_counts
 
-    def validate_input(self, input_data: any) -> bool:
+    def validate_input(self, input_data: Any) -> bool:
         """Validate stage input."""
         if not isinstance(input_data, list):
             return False

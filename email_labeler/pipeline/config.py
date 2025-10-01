@@ -130,19 +130,25 @@ class PipelineConfig:
         config = cls()
 
         # Override with environment variables if present
-        if os.getenv("LLM_SERVICE"):
-            config.transform.llm_service = os.getenv("LLM_SERVICE").lower()
+        llm_service = os.getenv("LLM_SERVICE")
+        if llm_service:
+            config.transform.llm_service = llm_service.lower()
 
-        if os.getenv("OPENAI_MODEL"):
-            config.transform.model = os.getenv("OPENAI_MODEL")
-        elif os.getenv("OLLAMA_MODEL"):
-            config.transform.model = os.getenv("OLLAMA_MODEL")
+        openai_model = os.getenv("OPENAI_MODEL")
+        if openai_model:
+            config.transform.model = openai_model
+        else:
+            ollama_model = os.getenv("OLLAMA_MODEL")
+            if ollama_model:
+                config.transform.model = ollama_model
 
-        if os.getenv("DATABASE_PATH"):
-            config.sync.database_path = os.getenv("DATABASE_PATH")
+        database_path = os.getenv("DATABASE_PATH")
+        if database_path:
+            config.sync.database_path = database_path
 
-        if os.getenv("LOG_LEVEL"):
-            config.monitoring.log_level = os.getenv("LOG_LEVEL")
+        log_level = os.getenv("LOG_LEVEL")
+        if log_level:
+            config.monitoring.log_level = log_level
 
         return config
 

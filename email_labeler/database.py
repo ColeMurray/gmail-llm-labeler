@@ -12,7 +12,9 @@ from .config import DATABASE_FILE
 class EmailDatabase:
     """Handles all database operations for email processing."""
 
-    def __init__(self, conn: sqlite3.Connection = None, database_file: str = DATABASE_FILE):
+    def __init__(
+        self, conn: Optional[sqlite3.Connection] = None, database_file: str = DATABASE_FILE
+    ):
         """Initialize database connection and create tables if needed.
 
         Args:

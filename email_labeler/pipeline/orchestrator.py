@@ -25,10 +25,10 @@ class EmailPipeline:
     def __init__(
         self,
         config: PipelineConfig,
-        email_processor: EmailProcessor = None,
-        database: EmailDatabase = None,
-        llm_service: LLMService = None,
-        metrics_tracker: MetricsTracker = None,
+        email_processor: Optional[EmailProcessor] = None,
+        database: Optional[EmailDatabase] = None,
+        llm_service: Optional[LLMService] = None,
+        metrics_tracker: Optional[MetricsTracker] = None,
     ):
         """Initialize the pipeline with configuration.
 

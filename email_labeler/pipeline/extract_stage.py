@@ -2,7 +2,7 @@
 
 import logging
 from datetime import datetime
-from typing import List
+from typing import Any, List, Optional
 
 from ..database import EmailDatabase
 from ..email_processor import EmailProcessor
@@ -18,8 +18,8 @@ class ExtractStage(PipelineStage):
     def __init__(
         self,
         config: ExtractConfig,
-        email_processor: EmailProcessor = None,
-        database: EmailDatabase = None,
+        email_processor: Optional[EmailProcessor] = None,
+        database: Optional[EmailDatabase] = None,
     ):
         """Initialize the extract stage.
 
@@ -85,7 +85,7 @@ class ExtractStage(PipelineStage):
             except Exception as e:
                 logger.warning(f"Failed to normalize email: {e}")
                 context.add_error(f"Failed to normalize email: {str(e)}")
-                if not self.config.skip_on_error:
+                if not self.skip_on_error:
                     raise
 
         return emails
@@ -108,7 +108,7 @@ class ExtractStage(PipelineStage):
             except Exception as e:
                 logger.warning(f"Failed to normalize email: {e}")
                 context.add_error(f"Failed to normalize email: {str(e)}")
-                if not self.config.skip_on_error:
+                if not self.skip_on_error:
                     raise
 
         return emails
@@ -136,7 +136,7 @@ class ExtractStage(PipelineStage):
             received_date=date,
         )
 
-    def validate_input(self, input_data: any) -> bool:
+    def validate_input(self, input_data: Any) -> bool:
         """Validate stage input."""
         # Extract stage doesn't require input data
         return input_data is None or isinstance(input_data, list)

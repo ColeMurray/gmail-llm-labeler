@@ -3,7 +3,7 @@
 import logging
 import time
 from datetime import datetime
-from typing import List
+from typing import Any, List, Optional
 
 from ..email_processor import EmailProcessor
 from ..llm_service import LLMService
@@ -19,8 +19,8 @@ class TransformStage(PipelineStage):
     def __init__(
         self,
         config: TransformConfig,
-        llm_service: LLMService = None,
-        email_processor: EmailProcessor = None,
+        llm_service: Optional[LLMService] = None,
+        email_processor: Optional[EmailProcessor] = None,
     ):
         """Initialize the transform stage.
 
@@ -164,7 +164,7 @@ class TransformStage(PipelineStage):
         confidence = min(base_confidence + explanation_factor, 1.0)
         return round(confidence, 2)
 
-    def validate_input(self, input_data: any) -> bool:
+    def validate_input(self, input_data: Any) -> bool:
         """Validate stage input."""
         if not isinstance(input_data, list):
             return False

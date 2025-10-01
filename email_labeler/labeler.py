@@ -2,7 +2,7 @@
 
 import logging
 import time
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 from .config import LLM_SERVICE, OLLAMA_MODEL, OPENAI_MODEL, PROCESSED_LABEL
 from .database import EmailDatabase
@@ -18,10 +18,10 @@ class EmailAutoLabeler:
         self,
         categories: List[str],
         max_content_length: int = 4000,
-        database: EmailDatabase = None,
-        llm_service: LLMService = None,
-        email_processor: EmailProcessor = None,
-        metrics_tracker: MetricsTracker = None,
+        database: Optional[EmailDatabase] = None,
+        llm_service: Optional[LLMService] = None,
+        email_processor: Optional[EmailProcessor] = None,
+        metrics_tracker: Optional[MetricsTracker] = None,
         test_mode: bool = False,
         preview_mode: bool = False,
     ):
@@ -51,18 +51,25 @@ class EmailAutoLabeler:
         self.metrics = metrics_tracker or (MetricsTracker() if test_mode else None)
 
         # Cache for label IDs
-        self.label_ids_cache = {}
+        self.label_ids_cache: Dict[str, str] = {}
 
         logging.info(f"EmailAutoLabeler initialized - Test: {test_mode}, Preview: {preview_mode}")
 
     def _get_label_ids(self):
         """Get or create all required Gmail labels."""
         if not self.label_ids_cache:
-            self.label_ids_cache["processed"] = self.email_processor.get_or_create_label(
-                PROCESSED_LABEL
-            )
+            processed_label_id = self.email_processor.get_or_create_label(PROCESSED_LABEL)
+            if processed_label_id is not None:
+                self.label_ids_cache["processed"] = processed_label_id
+            else:
+                logging.error(f"Failed to get or create label: {PROCESSED_LABEL}")
+
             for label in self.categories:
-                self.label_ids_cache[label] = self.email_processor.get_or_create_label(label)
+                label_id = self.email_processor.get_or_create_label(label)
+                if label_id is not None:
+                    self.label_ids_cache[label] = label_id
+                else:
+                    logging.error(f"Failed to get or create label: {label}")
         return self.label_ids_cache
 
     def _add_labels_with_preview(self, email_id: str, label_ids: List[str]) -> bool:

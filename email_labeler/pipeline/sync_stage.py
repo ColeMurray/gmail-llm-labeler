@@ -4,7 +4,7 @@ import json
 import logging
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from ..database import EmailDatabase
 from ..metrics import MetricsTracker
@@ -20,8 +20,8 @@ class SyncStage(PipelineStage):
     def __init__(
         self,
         config: SyncConfig,
-        database: EmailDatabase = None,
-        metrics_tracker: MetricsTracker = None,
+        database: Optional[EmailDatabase] = None,
+        metrics_tracker: Optional[MetricsTracker] = None,
     ):
         """Initialize the sync stage.
 
@@ -253,14 +253,14 @@ class SyncStage(PipelineStage):
 
     def _count_categories(self, results: List[ActionResult]) -> Dict[str, int]:
         """Count emails by category."""
-        categories = {}
+        categories: Dict[str, int] = {}
         for result in results:
             categories[result.category] = categories.get(result.category, 0) + 1
         return categories
 
     def _count_actions(self, results: List[ActionResult]) -> Dict[str, int]:
         """Count actions taken."""
-        actions = {}
+        actions: Dict[str, int] = {}
         for result in results:
             for action in result.actions_taken:
                 # Clean action name
@@ -295,7 +295,7 @@ class SyncStage(PipelineStage):
 
         logger.info("=" * 50)
 
-    def validate_input(self, input_data: any) -> bool:
+    def validate_input(self, input_data: Any) -> bool:
         """Validate stage input."""
         if not isinstance(input_data, list):
             return False

@@ -93,8 +93,8 @@ class TestEmailPipeline:
 
         # Mock each stage
         for stage_name in ["extract", "transform", "load", "sync"]:
-            pipeline.stages[stage_name].validate_input = Mock(return_value=True)
-            pipeline.stages[stage_name].get_metrics = Mock(return_value={})
+            pipeline.stages[stage_name].validate_input = Mock(return_value=True)  # type: ignore[method-assign]
+            pipeline.stages[stage_name].get_metrics = Mock(return_value={})  # type: ignore[method-assign]
 
         # Mock extract stage to add metrics to context
         def mock_extract_execute(input_data, context):
@@ -107,10 +107,10 @@ class TestEmailPipeline:
             context.add_metric("load_error_count", 0)
             return sample_load_results
 
-        pipeline.stages["extract"].execute = Mock(side_effect=mock_extract_execute)
-        pipeline.stages["transform"].execute = Mock(return_value=sample_enriched)
-        pipeline.stages["load"].execute = Mock(side_effect=mock_load_execute)
-        pipeline.stages["sync"].execute = Mock(return_value=sample_sync_results)
+        pipeline.stages["extract"].execute = Mock(side_effect=mock_extract_execute)  # type: ignore[method-assign]
+        pipeline.stages["transform"].execute = Mock(return_value=sample_enriched)  # type: ignore[method-assign]
+        pipeline.stages["load"].execute = Mock(side_effect=mock_load_execute)  # type: ignore[method-assign]
+        pipeline.stages["sync"].execute = Mock(return_value=sample_sync_results)  # type: ignore[method-assign]
 
         # Execute pipeline
         run_result = pipeline.run()
@@ -145,9 +145,9 @@ class TestEmailPipeline:
         )
 
         # Mock extract stage failure
-        pipeline.stages["extract"].validate_input = Mock(return_value=True)
-        pipeline.stages["extract"].execute = Mock(side_effect=Exception("Extract failed"))
-        pipeline.stages["extract"].get_metrics = Mock(return_value={})
+        pipeline.stages["extract"].validate_input = Mock(return_value=True)  # type: ignore[method-assign]
+        pipeline.stages["extract"].execute = Mock(side_effect=Exception("Extract failed"))  # type: ignore[method-assign]
+        pipeline.stages["extract"].get_metrics = Mock(return_value={})  # type: ignore[method-assign]
 
         run_result = pipeline.run()
 
