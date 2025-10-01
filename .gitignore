@@ -1,0 +1,110 @@
+# Credentials and secrets
+.env
+.env.local
+.env.production
+credentials.json
+token.json
+*.pem
+*.key
+*.p12
+
+# Databases - contains user email data
+*.db
+*.sqlite
+*.sqlite3
+email_pipeline*.db
+
+# Log files - may contain PII
+*.log
+*.jsonl
+llm_interactions.jsonl
+categorization_errors.log
+
+# Test outputs
+test_results.csv
+test_summary.json
+pipeline_metrics*.json
+*_local.json
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments
+venv/
+ENV/
+env/
+.venv
+
+# Testing and coverage
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+coverage.xml
+*.cover
+.hypothesis/
+
+# Type checking
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pyre/
+.pytype/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Documentation builds
+docs/_build/
+site/
+
+# Jupyter
+.ipynb_checkpoints
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# User data directories (if using default paths)
+data/
+logs/
+
+# Local packages
+gmail_llm/
+docs/DESIGN_DOCUMENT.md

@@ -1,0 +1,77 @@
+# File paths configuration (optional)
+# If not specified, platform-appropriate defaults will be used:
+#   - Linux/Mac: ~/.local/share/gmail-llm-labeler/
+#   - Windows: %LOCALAPPDATA%/gmail-llm-labeler/
+# You can also set these via environment variables (see .env.local.example)
+paths:
+  database_file: email_pipeline.db  # Can be relative or absolute path
+  llm_log_file: logs/llm_interactions.jsonl
+  error_log_file: logs/categorization_errors.log
+  test_output_file: test_results.csv
+  test_summary_file: test_summary.json
+
+pipeline:
+  dry_run: false
+  continue_on_error: true
+  max_retries: 3
+  extract:
+    source: gmail
+    gmail_query: is:unread
+    batch_size: 100
+    max_results: null
+  transform:
+    llm_service: openai
+    model: gpt-4o-mini
+    max_content_length: 4000
+    timeout: 30
+    skip_on_error: true
+    categories:
+    - Marketing
+    - Response Needed / High Priority
+    - Bills
+    - Subscriptions
+    - Newsletters
+    - Personal
+    - Work
+    - Events
+    - Travel
+    - Receipts
+    - Low quality
+    - Notifications
+    - Other
+  load:
+    apply_labels: true
+    create_missing_labels: true
+    category_actions:
+      Marketing:
+      - apply_label
+      - archive
+      Response Needed / High Priority:
+      - apply_label
+      - star
+      Bills:
+      - apply_label
+      - star
+      Newsletters:
+      - apply_label
+      - archive
+      Low quality:
+      - apply_label
+      - archive
+      - mark_as_read
+      Notifications:
+      - apply_label
+      - mark_as_read
+    default_actions:
+    - apply_label
+  sync:
+    database_path: email_pipeline.db
+    save_metrics: true
+    track_history: true
+    batch_size: 100
+    track_metrics: true
+  monitoring:
+    log_level: INFO
+    metrics_export: json
+    metrics_path: pipeline_metrics.json
+    enable_tracing: false

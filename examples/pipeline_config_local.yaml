@@ -1,0 +1,147 @@
+# Local Pipeline Configuration for Ollama + GPT-OSS
+# This configuration uses Ollama running locally with GPT-OSS models
+#
+# Prerequisites:
+#   1. Install Ollama: https://ollama.ai
+#   2. Pull a GPT-OSS model: ollama pull gpt-oss (or your specific model)
+#   3. Verify Ollama is running: curl http://localhost:11434/api/tags
+#
+# Environment variables you can set in .env:
+#   OLLAMA_BASE_URL=http://localhost:11434/v1
+#   OLLAMA_MODEL=gpt-oss
+#   GPT_OSS_REASONING=medium  # Options: low, medium, high
+#   LOG_LEVEL=INFO
+
+# =============================================================================
+# File Paths Configuration (optional)
+# =============================================================================
+# If not specified, files will be created in platform-appropriate locations:
+#   - Linux/Mac: ~/.local/share/gmail-llm-labeler/
+#   - Windows: %LOCALAPPDATA%/gmail-llm-labeler/
+#
+# These settings keep files in the project directory for local development
+paths:
+  database_file: ./email_pipeline.db
+  llm_log_file: ./llm_interactions.jsonl
+  error_log_file: ./categorization_errors.log
+  test_output_file: ./test_results.csv
+  test_summary_file: ./test_summary.json
+
+# =============================================================================
+# Pipeline Configuration
+# =============================================================================
+pipeline:
+  # General pipeline settings
+  dry_run: false
+  continue_on_error: true
+  max_retries: 3
+  
+  # Extract stage configuration
+  extract:
+    source: "gmail"  # Options: "gmail", "database"
+    gmail_query: "is:unread"  # Gmail search query
+    batch_size: 50  # Smaller batch for local processing
+    max_results: 100  # Limit for testing locally
+    
+  # Transform stage configuration - OLLAMA + GPT-OSS
+  transform:
+    llm_service: "ollama"  # Using local Ollama instead of OpenAI
+    model: "gpt-oss:20b"  # Your installed GPT-OSS 20B model
+    # Note: If you have a specific GPT-OSS version, specify it like:
+    # model: "gpt-oss-qwen-2.5-32b"
+    # model: "gpt-oss-llama-3.1-70b"
+    
+    max_content_length: 6000  # Truncate long emails
+    timeout: 60  # Longer timeout for local models (adjust based on your hardware)
+    skip_on_error: true  # Continue processing if one email fails
+    
+    # Email categories - customize these for your needs
+    categories:
+      - "Marketing"
+      - "Response Needed / High Priority"
+      - "Bills"
+      - "Subscriptions"
+      - "Newsletters"
+      - "Personal"
+      - "Work"
+      - "Events"
+      - "Travel"
+      - "Receipts"
+      - "Low quality"
+      - "Notifications"
+      - "Other"
+    
+  # Load stage configuration - what actions to take per category
+  load:
+    apply_labels: true
+    create_missing_labels: true
+    
+    # Define actions per category
+    # Available actions: apply_label, archive, star, mark_as_read
+    category_actions:
+      "Marketing":
+        - "apply_label"
+        - "archive"
+      
+      "Response Needed / High Priority":
+        - "apply_label"
+        - "star"
+      
+      "Bills":
+        - "apply_label"
+        - "star"
+      
+      "Subscriptions":
+        - "apply_label"
+      
+      "Newsletters":
+        - "apply_label"
+        - "archive"
+      
+      "Personal":
+        - "apply_label"
+      
+      "Work":
+        - "apply_label"
+      
+      "Events":
+        - "apply_label"
+        - "star"
+      
+      "Travel":
+        - "apply_label"
+        - "star"
+      
+      "Receipts":
+        - "apply_label"
+        - "archive"
+      
+      "Low quality":
+        - "apply_label"
+        - "archive"
+        - "mark_as_read"
+      
+      "Notifications":
+        - "apply_label"
+        - "mark_as_read"
+      
+      "Other":
+        - "apply_label"
+    
+    default_actions:
+      - "apply_label"
+    
+  # Sync stage configuration - database and metrics
+  sync:
+    database_path: "email_pipeline_local.db"  # Local database file
+    save_metrics: true
+    track_history: true
+    batch_size: 50
+    track_metrics: true
+    
+  # Monitoring and observability
+  monitoring:
+    log_level: "INFO"  # Options: DEBUG, INFO, WARNING, ERROR
+    metrics_export: "json"  # Options: "json", "csv"
+    metrics_path: "pipeline_metrics_local.json"
+    enable_tracing: false
