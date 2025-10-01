@@ -21,7 +21,7 @@ from .gmail_utils import (
 class EmailProcessor:
     """Handles email fetching and processing operations."""
 
-    def __init__(self, gmail_client: Resource = None, lazy_init: bool = False):
+    def __init__(self, gmail_client: Optional[Resource] = None, lazy_init: bool = False):
         """Initialize email processor with Gmail client.
 
         Args:
@@ -73,7 +73,7 @@ class EmailProcessor:
 
         return emails_data
 
-    def get_or_create_label(self, label_name: str) -> str:
+    def get_or_create_label(self, label_name: str) -> Optional[str]:
         """Get or create a Gmail label and return its ID."""
         self._ensure_gmail_client()
         return get_or_create_label(self.gmail, label_name)

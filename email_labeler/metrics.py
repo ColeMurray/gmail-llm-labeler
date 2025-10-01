@@ -5,7 +5,7 @@ import json
 import logging
 from collections import Counter
 from datetime import datetime
-from typing import Dict
+from typing import Dict, Optional
 
 from .config import TEST_OUTPUT_FILE, TEST_SUMMARY_FILE
 
@@ -45,7 +45,11 @@ class MetricsTracker:
         )
 
     def add_result(
-        self, email_id: str, category: str, success: bool = True, processing_time: float = None
+        self,
+        email_id: str,
+        category: str,
+        success: bool = True,
+        processing_time: Optional[float] = None,
     ):
         """Add a pipeline result entry."""
         self.results.append(

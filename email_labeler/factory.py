@@ -2,7 +2,7 @@
 
 import logging
 import sqlite3
-from typing import Optional
+from typing import List, Optional
 
 from googleapiclient.discovery import Resource
 from openai import OpenAI
@@ -99,7 +99,7 @@ def create_email_processor(
 
 
 def create_llm_service(
-    categories: list[str],
+    categories: List[str],
     max_content_length: int = 4000,
     llm_client: Optional[OpenAI] = None,
     model: Optional[str] = None,
@@ -121,6 +121,9 @@ def create_llm_service(
         llm_client = create_llm_client(service)
         if model is None:
             model = OLLAMA_MODEL if service == "Ollama" else OPENAI_MODEL
+    # Ensure model is not None
+    if model is None:
+        model = OLLAMA_MODEL if service == "Ollama" else OPENAI_MODEL
     return LLMService(
         categories=categories,
         max_content_length=max_content_length,
@@ -130,7 +133,7 @@ def create_llm_service(
 
 
 def create_email_auto_labeler(
-    categories: list[str],
+    categories: List[str],
     max_content_length: int = 4000,
     database: Optional[EmailDatabase] = None,
     llm_service: Optional[LLMService] = None,
@@ -193,7 +196,9 @@ def create_email_auto_labeler(
     )
 
 
-def create_test_dependencies(categories: list[str] = None, max_content_length: int = 4000):
+def create_test_dependencies(
+    categories: Optional[List[str]] = None, max_content_length: int = 4000
+):
     """Create a set of test dependencies with in-memory database.
 
     This is useful for unit testing.

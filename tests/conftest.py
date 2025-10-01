@@ -130,9 +130,9 @@ def mock_openai_client():
     # Mock chat completion response
     mock_response = MagicMock()
     mock_response.choices = [MagicMock()]
-    mock_response.choices[
-        0
-    ].message.content = '{"category": "Work", "explanation": "Business related email"}'
+    mock_response.choices[0].message.content = (
+        '{"category": "Work", "explanation": "Business related email"}'
+    )
 
     mock_client.chat.completions.create.return_value = mock_response
 
@@ -357,8 +357,11 @@ def email_auto_labeler(mock_email_processor, llm_service, mock_metrics_tracker, 
 @pytest.fixture(autouse=True)
 def mock_logging():
     """Mock logging to prevent log output during tests."""
-    with patch("logging.info"), patch("logging.error"), patch("logging.warning"), patch(
-        "logging.debug"
+    with (
+        patch("logging.info"),
+        patch("logging.error"),
+        patch("logging.warning"),
+        patch("logging.debug"),
     ):
         yield
 
@@ -386,9 +389,12 @@ def cli_args():
 @pytest.fixture
 def mock_file_operations():
     """Mock file operations."""
-    with patch("builtins.open", create=True) as mock_open, patch(
-        "os.path.exists", return_value=True
-    ), patch("json.dump"), patch("json.load", return_value={}):
+    with (
+        patch("builtins.open", create=True) as mock_open,
+        patch("os.path.exists", return_value=True),
+        patch("json.dump"),
+        patch("json.load", return_value={}),
+    ):
         yield mock_open
 
 

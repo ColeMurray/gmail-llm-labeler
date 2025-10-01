@@ -32,11 +32,12 @@ class TestLLMService:
 
     def test_init_without_client_openai(self):
         """Test initialization without client for OpenAI."""
-        with patch("email_labeler.llm_service.LLM_SERVICE", "OpenAI"), patch(
-            "email_labeler.llm_service.OPENAI_API_KEY", "test-key"
-        ), patch("email_labeler.llm_service.OPENAI_MODEL", "gpt-3.5-turbo"), patch(
-            "email_labeler.llm_service.OpenAI"
-        ) as mock_openai:
+        with (
+            patch("email_labeler.llm_service.LLM_SERVICE", "OpenAI"),
+            patch("email_labeler.llm_service.OPENAI_API_KEY", "test-key"),
+            patch("email_labeler.llm_service.OPENAI_MODEL", "gpt-3.5-turbo"),
+            patch("email_labeler.llm_service.OpenAI") as mock_openai,
+        ):
             service = LLMService(
                 categories=TEST_CATEGORIES, max_content_length=TEST_MAX_CONTENT_LENGTH
             )
@@ -46,11 +47,12 @@ class TestLLMService:
 
     def test_init_without_client_ollama(self):
         """Test initialization without client for Ollama."""
-        with patch("email_labeler.llm_service.LLM_SERVICE", "Ollama"), patch(
-            "email_labeler.llm_service.OLLAMA_BASE_URL", "http://localhost:11434/v1"
-        ), patch("email_labeler.llm_service.OLLAMA_MODEL", "llama2"), patch(
-            "email_labeler.llm_service.OpenAI"
-        ) as mock_openai:
+        with (
+            patch("email_labeler.llm_service.LLM_SERVICE", "Ollama"),
+            patch("email_labeler.llm_service.OLLAMA_BASE_URL", "http://localhost:11434/v1"),
+            patch("email_labeler.llm_service.OLLAMA_MODEL", "llama2"),
+            patch("email_labeler.llm_service.OpenAI") as mock_openai,
+        ):
             service = LLMService(
                 categories=TEST_CATEGORIES, max_content_length=TEST_MAX_CONTENT_LENGTH
             )
@@ -65,9 +67,9 @@ class TestLLMService:
         email_content = "Meeting tomorrow at 2 PM with the development team."
         expected_response = {"category": "Work", "explanation": "Business meeting notification"}
 
-        mock_openai_client.chat.completions.create.return_value.choices[
-            0
-        ].message.content = json.dumps(expected_response)
+        mock_openai_client.chat.completions.create.return_value.choices[0].message.content = (
+            json.dumps(expected_response)
+        )
 
         category, explanation = real_llm_service.categorize_email(email_content)
 
@@ -85,9 +87,9 @@ class TestLLMService:
         long_content = "A" * 3000  # Long content to test truncation
         expected_response = {"category": "Other", "explanation": "Test"}
 
-        mock_openai_client.chat.completions.create.return_value.choices[
-            0
-        ].message.content = json.dumps(expected_response)
+        mock_openai_client.chat.completions.create.return_value.choices[0].message.content = (
+            json.dumps(expected_response)
+        )
 
         # Create service with custom max_content_length
         llm_service = LLMService(
@@ -106,9 +108,9 @@ class TestLLMService:
     def test_categorize_email_invalid_json_response(self, real_llm_service, mock_openai_client):
         """Test handling invalid JSON response from LLM."""
         email_content = "Test email content"
-        mock_openai_client.chat.completions.create.return_value.choices[
-            0
-        ].message.content = "Invalid JSON"
+        mock_openai_client.chat.completions.create.return_value.choices[0].message.content = (
+            "Invalid JSON"
+        )
 
         category, explanation = real_llm_service.categorize_email(email_content)
 
@@ -120,9 +122,9 @@ class TestLLMService:
         email_content = "Test email content"
         incomplete_response = {"category": "Work"}  # Missing explanation
 
-        mock_openai_client.chat.completions.create.return_value.choices[
-            0
-        ].message.content = json.dumps(incomplete_response)
+        mock_openai_client.chat.completions.create.return_value.choices[0].message.content = (
+            json.dumps(incomplete_response)
+        )
 
         # Create LLMService with mocked client
         llm_service = LLMService(
@@ -160,9 +162,9 @@ class TestLLMService:
         email_content = "Test email content"
         response = {"category": "InvalidCategory", "explanation": "Test explanation"}
 
-        mock_openai_client.chat.completions.create.return_value.choices[
-            0
-        ].message.content = json.dumps(response)
+        mock_openai_client.chat.completions.create.return_value.choices[0].message.content = (
+            json.dumps(response)
+        )
 
         # Create LLMService with mocked client
         llm_service = LLMService(
@@ -179,9 +181,11 @@ class TestLLMService:
 
     def test_get_llm_client_openai(self):
         """Test getting OpenAI client."""
-        with patch("email_labeler.llm_service.LLM_SERVICE", "OpenAI"), patch(
-            "email_labeler.llm_service.OPENAI_API_KEY", "test-key"
-        ), patch("email_labeler.llm_service.OpenAI") as mock_openai:
+        with (
+            patch("email_labeler.llm_service.LLM_SERVICE", "OpenAI"),
+            patch("email_labeler.llm_service.OPENAI_API_KEY", "test-key"),
+            patch("email_labeler.llm_service.OpenAI") as mock_openai,
+        ):
             service = LLMService(
                 categories=TEST_CATEGORIES, max_content_length=TEST_MAX_CONTENT_LENGTH
             )
@@ -191,9 +195,11 @@ class TestLLMService:
 
     def test_get_llm_client_ollama(self):
         """Test getting Ollama client."""
-        with patch("email_labeler.llm_service.LLM_SERVICE", "Ollama"), patch(
-            "email_labeler.llm_service.OLLAMA_BASE_URL", "http://localhost:11434/v1"
-        ), patch("email_labeler.llm_service.OpenAI") as mock_openai:
+        with (
+            patch("email_labeler.llm_service.LLM_SERVICE", "Ollama"),
+            patch("email_labeler.llm_service.OLLAMA_BASE_URL", "http://localhost:11434/v1"),
+            patch("email_labeler.llm_service.OpenAI") as mock_openai,
+        ):
             service = LLMService(
                 categories=TEST_CATEGORIES, max_content_length=TEST_MAX_CONTENT_LENGTH
             )
@@ -213,9 +219,9 @@ class TestLLMService:
     def test_categorize_various_emails(self, mock_openai_client, content, expected_category):
         """Test categorizing various types of emails."""
         response = {"category": expected_category, "explanation": "Test explanation"}
-        mock_openai_client.chat.completions.create.return_value.choices[
-            0
-        ].message.content = json.dumps(response)
+        mock_openai_client.chat.completions.create.return_value.choices[0].message.content = (
+            json.dumps(response)
+        )
 
         # Create LLMService with mocked client
         llm_service = LLMService(
@@ -235,12 +241,13 @@ class TestLLMService:
         email_content = "Project deadline reminder"
         expected_response = {"category": "Work", "explanation": "Business related"}
 
-        mock_openai_client.chat.completions.create.return_value.choices[
-            0
-        ].message.content = json.dumps(expected_response)
+        mock_openai_client.chat.completions.create.return_value.choices[0].message.content = (
+            json.dumps(expected_response)
+        )
 
-        with patch("email_labeler.llm_service.LLM_SERVICE", "Ollama"), patch(
-            "email_labeler.llm_service.GPT_OSS_REASONING", "medium"
+        with (
+            patch("email_labeler.llm_service.LLM_SERVICE", "Ollama"),
+            patch("email_labeler.llm_service.GPT_OSS_REASONING", "medium"),
         ):
             # Create LLMService with mocked client - use a gpt-oss model to trigger reasoning
             llm_service = LLMService(
@@ -263,9 +270,9 @@ class TestLLMService:
         """Test categorizing empty email content."""
         empty_content = ""
         response = {"category": "Other", "explanation": "Empty email"}
-        mock_openai_client.chat.completions.create.return_value.choices[
-            0
-        ].message.content = json.dumps(response)
+        mock_openai_client.chat.completions.create.return_value.choices[0].message.content = (
+            json.dumps(response)
+        )
 
         # Create LLMService with mocked client
         llm_service = LLMService(
@@ -290,8 +297,9 @@ class TestLLMService:
             model="gpt-3.5-turbo",
         )
 
-        with patch("builtins.open", create=True) as mock_open, patch(
-            "email_labeler.llm_service.LLM_LOG_FILE", "/tmp/test.log"
+        with (
+            patch("builtins.open", create=True) as mock_open,
+            patch("email_labeler.llm_service.LLM_LOG_FILE", "/tmp/test.log"),
         ):
             # Test the _log_interaction method
             llm_service._log_interaction(1.0, 2.5, '{"category": "Work"}')
@@ -317,7 +325,7 @@ class TestLLMService:
         from openai import APITimeoutError
 
         email_content = "Test email"
-        mock_openai_client.chat.completions.create.side_effect = APITimeoutError("Request Timeout")
+        mock_openai_client.chat.completions.create.side_effect = APITimeoutError("Request Timeout")  # type: ignore[arg-type]
 
         # Create LLMService with mocked client
         llm_service = LLMService(
@@ -357,9 +365,11 @@ class TestLLMService:
     def test_unsupported_service_fallback(self):
         """Test handling of unsupported service configurations."""
         # The actual implementation doesn't validate service type, it just defaults to OpenAI
-        with patch("email_labeler.llm_service.LLM_SERVICE", "UnsupportedService"), patch(
-            "email_labeler.llm_service.OPENAI_API_KEY", "test-key"
-        ), patch("email_labeler.llm_service.OpenAI") as mock_openai:
+        with (
+            patch("email_labeler.llm_service.LLM_SERVICE", "UnsupportedService"),
+            patch("email_labeler.llm_service.OPENAI_API_KEY", "test-key"),
+            patch("email_labeler.llm_service.OpenAI") as mock_openai,
+        ):
             LLMService(categories=TEST_CATEGORIES, max_content_length=TEST_MAX_CONTENT_LENGTH)
             # Should fall through to OpenAI case since it's not "Ollama"
             mock_openai.assert_called_with(api_key="test-key")

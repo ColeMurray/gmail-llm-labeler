@@ -4,7 +4,7 @@ import json
 import logging
 import time
 from datetime import datetime
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 
 from openai import OpenAI
 
@@ -27,8 +27,8 @@ class LLMService:
         self,
         categories: List[str],
         max_content_length: int = 4000,
-        llm_client: OpenAI = None,
-        model: str = None,
+        llm_client: Optional[OpenAI] = None,
+        model: Optional[str] = None,
         lazy_init: bool = False,
     ):
         """Initialize the LLM client.
@@ -43,6 +43,7 @@ class LLMService:
         self.categories = categories
         self.max_content_length = max_content_length
         self._lazy_init = lazy_init
+        self.llm_client: Optional[OpenAI]
         if llm_client is not None:
             self.llm_client = llm_client
             self.model = model or (OLLAMA_MODEL if LLM_SERVICE == "Ollama" else OPENAI_MODEL)
@@ -156,14 +157,15 @@ Respond with a JSON object:
             completion_kwargs["response_format"] = {"type": "json_object"}
 
         logging.debug(f"Calling {LLM_SERVICE} API with model {self.model}")
-        response = self.llm_client.chat.completions.create(**completion_kwargs)
+        assert self.llm_client is not None, "LLM client must be initialized"
+        response = self.llm_client.chat.completions.create(**completion_kwargs)  # type: ignore[call-overload]
 
         end_time = time.time()
 
         # Log the interaction
         self._log_interaction(start_time, end_time, response.choices[0].message.content)
 
-        return response.choices[0].message.content
+        return response.choices[0].message.content  # type: ignore[no-any-return]
 
     def _parse_response(self, response_text: str) -> Tuple[str, str]:
         """Parse and validate the LLM response."""
