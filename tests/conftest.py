@@ -298,10 +298,14 @@ def llm_service(mock_openai_client):
 
 
 @pytest.fixture
-def real_llm_service(mock_openai_client):
+def real_llm_service(mock_openai_client, pipeline_config):
     """Create a real LLMService instance with mocked client."""
 
-    return LLMService(llm_client=mock_openai_client, model="gpt-3.5-turbo")
+    return LLMService(
+        categories=pipeline_config.transform.categories,
+        llm_client=mock_openai_client,
+        model="gpt-3.5-turbo",
+    )
 
 
 @pytest.fixture
@@ -331,9 +335,10 @@ def mock_email_processor(mock_gmail_client):
 
 
 @pytest.fixture
-def email_auto_labeler(mock_email_processor, llm_service, mock_metrics_tracker):
+def email_auto_labeler(mock_email_processor, llm_service, mock_metrics_tracker, pipeline_config):
     """Create an EmailAutoLabeler instance with mocked dependencies."""
     labeler = EmailAutoLabeler(
+        categories=pipeline_config.transform.categories,
         email_processor=mock_email_processor,
         llm_service=llm_service,
         metrics_tracker=mock_metrics_tracker,

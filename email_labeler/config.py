@@ -176,21 +176,6 @@ logging.basicConfig(
 
 # Gmail labels
 PROCESSED_LABEL = "Processed"
-CATEGORY_LABELS = [
-    "Marketing",
-    "Response Needed / High Priority",
-    "Bills",
-    "Subscriptions",
-    "Newsletters",
-    "Personal",
-    "Work",
-    "Events",
-    "Travel",
-    "Receipts",
-    "Low quality",
-    "Notifications",
-    "Other",
-]
 
 # LLM Configuration
 LLM_SERVICE = os.getenv("LLM_SERVICE", "OpenAI")  # "OpenAI" or "Ollama"

@@ -153,15 +153,21 @@ class TestFactoryFunctions:
         """Test creating LLMService with provided client."""
         mock_client = MagicMock()
         model = "gpt-4"
+        test_categories = ["Work", "Personal", "Other"]
 
-        service = create_llm_service(llm_client=mock_client, model=model)
+        service = create_llm_service(
+            categories=test_categories, llm_client=mock_client, model=model
+        )
 
         assert isinstance(service, LLMService)
         assert service.llm_client == mock_client
         assert service.model == model
+        assert service.categories == test_categories
 
     def test_create_llm_service_without_client(self):
         """Test creating LLMService without client."""
+        test_categories = ["Work", "Personal", "Other"]
+
         with patch("email_labeler.factory.create_llm_client") as mock_create_client:
             mock_client = MagicMock()
             mock_create_client.return_value = mock_client
@@ -169,9 +175,10 @@ class TestFactoryFunctions:
             with patch("email_labeler.factory.OPENAI_MODEL", "gpt-3.5-turbo"), patch(
                 "email_labeler.factory.LLM_SERVICE", "OpenAI"
             ):
-                service = create_llm_service()
+                service = create_llm_service(categories=test_categories)
 
                 assert isinstance(service, LLMService)
+                assert service.categories == test_categories
                 mock_create_client.assert_called_once()
 
     def test_create_email_auto_labeler_with_dependencies(self):
@@ -180,8 +187,10 @@ class TestFactoryFunctions:
         mock_llm_service = MagicMock()
         mock_metrics = MagicMock()
         mock_database = MagicMock()
+        test_categories = ["Work", "Personal", "Other"]
 
         labeler = create_email_auto_labeler(
+            categories=test_categories,
             database=mock_database,
             email_processor=mock_processor,
             llm_service=mock_llm_service,
@@ -189,6 +198,7 @@ class TestFactoryFunctions:
         )
 
         assert isinstance(labeler, EmailAutoLabeler)
+        assert labeler.categories == test_categories
         assert labeler.database == mock_database
         assert labeler.email_processor == mock_processor
         assert labeler.llm_service == mock_llm_service
@@ -197,6 +207,8 @@ class TestFactoryFunctions:
     def test_create_email_auto_labeler_without_dependencies(self):
         """Test creating EmailAutoLabeler without dependencies."""
         from email_labeler.config import DATABASE_FILE, LLM_SERVICE
+
+        test_categories = ["Work", "Personal", "Other"]
 
         with patch("email_labeler.factory.create_email_database") as mock_create_db, patch(
             "email_labeler.factory.create_email_processor"
@@ -211,12 +223,13 @@ class TestFactoryFunctions:
             mock_create_processor.return_value = mock_processor
             mock_create_llm.return_value = mock_llm_service
 
-            labeler = create_email_auto_labeler()
+            labeler = create_email_auto_labeler(categories=test_categories)
 
             assert isinstance(labeler, EmailAutoLabeler)
+            assert labeler.categories == test_categories
             mock_create_db.assert_called_once_with(database_file=DATABASE_FILE)
             mock_create_processor.assert_called_once_with(port=8080)
-            mock_create_llm.assert_called_once_with(service=LLM_SERVICE)
+            mock_create_llm.assert_called_once_with(categories=test_categories, service=LLM_SERVICE)
 
     def test_create_test_dependencies(self):
         """Test creating test dependencies."""
@@ -381,15 +394,19 @@ class TestFactoryFunctions:
         mock_conn = MagicMock(spec=sqlite3.Connection)
         mock_gmail = MagicMock()
         mock_llm = MagicMock()
+        test_categories = ["Work", "Personal", "Other"]
 
         # Create components with mocks
         database = create_email_database(conn=mock_conn)
         processor = create_email_processor(gmail_client=mock_gmail)
 
-        llm_service = create_llm_service(llm_client=mock_llm)
+        llm_service = create_llm_service(categories=test_categories, llm_client=mock_llm)
 
         labeler = create_email_auto_labeler(
-            database=database, email_processor=processor, llm_service=llm_service
+            categories=test_categories,
+            database=database,
+            email_processor=processor,
+            llm_service=llm_service,
         )
 
         # Verify mock integration

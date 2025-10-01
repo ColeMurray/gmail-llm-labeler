@@ -4,7 +4,7 @@ import logging
 import time
 from typing import List, Optional
 
-from .config import CATEGORY_LABELS, LLM_SERVICE, OLLAMA_MODEL, OPENAI_MODEL, PROCESSED_LABEL
+from .config import LLM_SERVICE, OLLAMA_MODEL, OPENAI_MODEL, PROCESSED_LABEL
 from .database import EmailDatabase
 from .email_processor import EmailProcessor
 from .llm_service import LLMService
@@ -16,6 +16,7 @@ class EmailAutoLabeler:
 
     def __init__(
         self,
+        categories: List[str],
         database: EmailDatabase = None,
         llm_service: LLMService = None,
         email_processor: EmailProcessor = None,
@@ -26,6 +27,7 @@ class EmailAutoLabeler:
         """Initialize the email auto-labeler.
 
         Args:
+            categories: List of category labels for email classification.
             database: Optional EmailDatabase instance. If not provided, creates a new one.
             llm_service: Optional LLMService instance. If not provided, creates a new one.
             email_processor: Optional EmailProcessor instance. If not provided, creates a new one.
@@ -33,12 +35,13 @@ class EmailAutoLabeler:
             test_mode: Whether to run in test mode.
             preview_mode: Whether to run in preview mode.
         """
+        self.categories = categories
         self.test_mode = test_mode
         self.preview_mode = preview_mode
 
         # Initialize components with dependency injection
         self.database = database or EmailDatabase()
-        self.llm_service = llm_service or LLMService()
+        self.llm_service = llm_service or LLMService(categories=categories)
         self.email_processor = email_processor or EmailProcessor()
         self.metrics = metrics_tracker or (MetricsTracker() if test_mode else None)
 
@@ -53,7 +56,7 @@ class EmailAutoLabeler:
             self.label_ids_cache["processed"] = self.email_processor.get_or_create_label(
                 PROCESSED_LABEL
             )
-            for label in CATEGORY_LABELS:
+            for label in self.categories:
                 self.label_ids_cache[label] = self.email_processor.get_or_create_label(label)
         return self.label_ids_cache
 

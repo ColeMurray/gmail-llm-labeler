@@ -7,6 +7,9 @@ import pytest
 
 from email_labeler.llm_service import LLMService
 
+# Test categories for all tests
+TEST_CATEGORIES = ["Marketing", "Work", "Personal", "Bills", "Newsletters", "Other"]
+
 
 class TestLLMService:
     """Test cases for LLMService class."""
@@ -14,10 +17,11 @@ class TestLLMService:
     def test_init_with_client(self, mock_openai_client):
         """Test initialization with provided client."""
         model = "gpt-4"
-        service = LLMService(llm_client=mock_openai_client, model=model)
+        service = LLMService(categories=TEST_CATEGORIES, llm_client=mock_openai_client, model=model)
 
         assert service.llm_client == mock_openai_client
         assert service.model == model
+        assert service.categories == TEST_CATEGORIES
 
     def test_init_without_client_openai(self):
         """Test initialization without client for OpenAI."""
@@ -26,7 +30,7 @@ class TestLLMService:
         ), patch("email_labeler.llm_service.OPENAI_MODEL", "gpt-3.5-turbo"), patch(
             "email_labeler.llm_service.OpenAI"
         ) as mock_openai:
-            service = LLMService()
+            service = LLMService(categories=TEST_CATEGORIES)
 
             mock_openai.assert_called_once_with(api_key="test-key")
             assert service.model == "gpt-3.5-turbo"
@@ -38,7 +42,7 @@ class TestLLMService:
         ), patch("email_labeler.llm_service.OLLAMA_MODEL", "llama2"), patch(
             "email_labeler.llm_service.OpenAI"
         ) as mock_openai:
-            service = LLMService()
+            service = LLMService(categories=TEST_CATEGORIES)
 
             mock_openai.assert_called_once_with(
                 base_url="http://localhost:11434/v1", api_key="ollama"
@@ -104,7 +108,9 @@ class TestLLMService:
         ].message.content = json.dumps(incomplete_response)
 
         # Create LLMService with mocked client
-        llm_service = LLMService(llm_client=mock_openai_client, model="gpt-3.5-turbo")
+        llm_service = LLMService(
+            categories=TEST_CATEGORIES, llm_client=mock_openai_client, model="gpt-3.5-turbo"
+        )
 
         category, explanation = llm_service.categorize_email(email_content)
 
@@ -117,7 +123,9 @@ class TestLLMService:
         mock_openai_client.chat.completions.create.side_effect = Exception("API Error")
 
         # Create LLMService with mocked client
-        llm_service = LLMService(llm_client=mock_openai_client, model="gpt-3.5-turbo")
+        llm_service = LLMService(
+            categories=TEST_CATEGORIES, llm_client=mock_openai_client, model="gpt-3.5-turbo"
+        )
 
         category, explanation = llm_service.categorize_email(email_content)
 
@@ -134,7 +142,9 @@ class TestLLMService:
         ].message.content = json.dumps(response)
 
         # Create LLMService with mocked client
-        llm_service = LLMService(llm_client=mock_openai_client, model="gpt-3.5-turbo")
+        llm_service = LLMService(
+            categories=TEST_CATEGORIES, llm_client=mock_openai_client, model="gpt-3.5-turbo"
+        )
 
         category, explanation = llm_service.categorize_email(email_content)
 
@@ -146,7 +156,7 @@ class TestLLMService:
         with patch("email_labeler.llm_service.LLM_SERVICE", "OpenAI"), patch(
             "email_labeler.llm_service.OPENAI_API_KEY", "test-key"
         ), patch("email_labeler.llm_service.OpenAI") as mock_openai:
-            service = LLMService()
+            service = LLMService(categories=TEST_CATEGORIES)
             service._get_llm_client()
 
             mock_openai.assert_called_with(api_key="test-key")
@@ -156,7 +166,7 @@ class TestLLMService:
         with patch("email_labeler.llm_service.LLM_SERVICE", "Ollama"), patch(
             "email_labeler.llm_service.OLLAMA_BASE_URL", "http://localhost:11434/v1"
         ), patch("email_labeler.llm_service.OpenAI") as mock_openai:
-            service = LLMService()
+            service = LLMService(categories=TEST_CATEGORIES)
             service._get_llm_client()
 
             mock_openai.assert_called_with(base_url="http://localhost:11434/v1", api_key="ollama")
@@ -178,7 +188,9 @@ class TestLLMService:
         ].message.content = json.dumps(response)
 
         # Create LLMService with mocked client
-        llm_service = LLMService(llm_client=mock_openai_client, model="gpt-3.5-turbo")
+        llm_service = LLMService(
+            categories=TEST_CATEGORIES, llm_client=mock_openai_client, model="gpt-3.5-turbo"
+        )
 
         category, explanation = llm_service.categorize_email(content)
 
@@ -198,7 +210,9 @@ class TestLLMService:
             "email_labeler.llm_service.GPT_OSS_REASONING", "medium"
         ):
             # Create LLMService with mocked client - use a gpt-oss model to trigger reasoning
-            llm_service = LLMService(llm_client=mock_openai_client, model="gpt-oss-instruct")
+            llm_service = LLMService(
+                categories=TEST_CATEGORIES, llm_client=mock_openai_client, model="gpt-oss-instruct"
+            )
 
             llm_service.categorize_email(email_content)
 
@@ -218,7 +232,9 @@ class TestLLMService:
         ].message.content = json.dumps(response)
 
         # Create LLMService with mocked client
-        llm_service = LLMService(llm_client=mock_openai_client, model="gpt-3.5-turbo")
+        llm_service = LLMService(
+            categories=TEST_CATEGORIES, llm_client=mock_openai_client, model="gpt-3.5-turbo"
+        )
 
         category, explanation = llm_service.categorize_email(empty_content)
 
@@ -228,7 +244,9 @@ class TestLLMService:
     def test_log_interaction(self, mock_openai_client):
         """Test logging of LLM interactions."""
         # Create LLMService with mocked client
-        llm_service = LLMService(llm_client=mock_openai_client, model="gpt-3.5-turbo")
+        llm_service = LLMService(
+            categories=TEST_CATEGORIES, llm_client=mock_openai_client, model="gpt-3.5-turbo"
+        )
 
         with patch("builtins.open", create=True) as mock_open, patch(
             "email_labeler.llm_service.LLM_LOG_FILE", "/tmp/test.log"
@@ -244,7 +262,7 @@ class TestLLMService:
 
         for model in models:
             mock_client = MagicMock()
-            service = LLMService(llm_client=mock_client, model=model)
+            service = LLMService(categories=TEST_CATEGORIES, llm_client=mock_client, model=model)
             assert service.model == model
 
     def test_timeout_handling(self, mock_openai_client):
@@ -255,7 +273,9 @@ class TestLLMService:
         mock_openai_client.chat.completions.create.side_effect = APITimeoutError("Request Timeout")
 
         # Create LLMService with mocked client
-        llm_service = LLMService(llm_client=mock_openai_client, model="gpt-3.5-turbo")
+        llm_service = LLMService(
+            categories=TEST_CATEGORIES, llm_client=mock_openai_client, model="gpt-3.5-turbo"
+        )
 
         category, explanation = llm_service.categorize_email(email_content)
 
@@ -272,7 +292,9 @@ class TestLLMService:
         )
 
         # Create LLMService with mocked client
-        llm_service = LLMService(llm_client=mock_openai_client, model="gpt-3.5-turbo")
+        llm_service = LLMService(
+            categories=TEST_CATEGORIES, llm_client=mock_openai_client, model="gpt-3.5-turbo"
+        )
 
         category, explanation = llm_service.categorize_email(email_content)
 
@@ -285,6 +307,6 @@ class TestLLMService:
         with patch("email_labeler.llm_service.LLM_SERVICE", "UnsupportedService"), patch(
             "email_labeler.llm_service.OPENAI_API_KEY", "test-key"
         ), patch("email_labeler.llm_service.OpenAI") as mock_openai:
-            LLMService()
+            LLMService(categories=TEST_CATEGORIES)
             # Should fall through to OpenAI case since it's not "Ollama"
             mock_openai.assert_called_with(api_key="test-key")

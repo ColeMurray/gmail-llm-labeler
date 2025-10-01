@@ -6,6 +6,9 @@ import pytest
 
 from email_labeler.labeler import EmailAutoLabeler
 
+# Test categories for all tests
+TEST_CATEGORIES = ["Marketing", "Work", "Personal", "Bills", "Newsletters", "Other"]
+
 
 class TestEmailAutoLabeler:
     """Test cases for EmailAutoLabeler class."""
@@ -13,11 +16,13 @@ class TestEmailAutoLabeler:
     def test_init(self, mock_email_processor, llm_service, mock_metrics_tracker):
         """Test EmailAutoLabeler initialization."""
         labeler = EmailAutoLabeler(
+            categories=TEST_CATEGORIES,
             email_processor=mock_email_processor,
             llm_service=llm_service,
             metrics_tracker=mock_metrics_tracker,
         )
 
+        assert labeler.categories == TEST_CATEGORIES
         assert labeler.email_processor == mock_email_processor
         assert labeler.llm_service == llm_service
         assert labeler.metrics == mock_metrics_tracker
@@ -100,6 +105,7 @@ class TestEmailAutoLabeler:
         """Test processing in test mode (no actual label application)."""
         # Create labeler in test mode
         email_auto_labeler = EmailAutoLabeler(
+            categories=TEST_CATEGORIES,
             email_processor=mock_email_processor,
             llm_service=llm_service,
             metrics_tracker=mock_metrics_tracker,
@@ -213,6 +219,7 @@ class TestEmailAutoLabeler:
         """Test running in preview mode."""
         # Create labeler in preview mode
         email_auto_labeler = EmailAutoLabeler(
+            categories=TEST_CATEGORIES,
             email_processor=mock_email_processor,
             llm_service=llm_service,
             metrics_tracker=mock_metrics_tracker,
@@ -249,6 +256,7 @@ class TestEmailAutoLabeler:
     def test_metrics_in_test_mode(self, mock_email_processor, llm_service, mock_metrics_tracker):
         """Test that metrics are saved in test mode."""
         email_auto_labeler = EmailAutoLabeler(
+            categories=TEST_CATEGORIES,
             email_processor=mock_email_processor,
             llm_service=llm_service,
             metrics_tracker=mock_metrics_tracker,
@@ -308,6 +316,7 @@ class TestEmailAutoLabeler:
     def test_metrics_tracking(self, mock_email_processor, llm_service, mock_metrics_tracker):
         """Test that metrics are properly tracked in test mode."""
         email_auto_labeler = EmailAutoLabeler(
+            categories=TEST_CATEGORIES,
             email_processor=mock_email_processor,
             llm_service=llm_service,
             metrics_tracker=mock_metrics_tracker,
@@ -368,6 +377,7 @@ class TestEmailAutoLabeler:
         """Test dry run mode functionality (same as preview mode in current implementation)."""
         # Create labeler in preview mode (acts like dry run)
         email_auto_labeler = EmailAutoLabeler(
+            categories=TEST_CATEGORIES,
             email_processor=mock_email_processor,
             llm_service=llm_service,
             metrics_tracker=mock_metrics_tracker,
