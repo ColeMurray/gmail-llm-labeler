@@ -176,10 +176,6 @@ logging.basicConfig(
 
 # Gmail labels
 PROCESSED_LABEL = "Processed"
-# NOTE: CATEGORY_LABELS has been removed. Categories are now configured via
-# pipeline.transform.categories in YAML config or TransformConfig dataclass.
-# This provides better flexibility and allows users to customize categories
-# without modifying source code.
 
 # LLM Configuration
 LLM_SERVICE = os.getenv("LLM_SERVICE", "OpenAI")  # "OpenAI" or "Ollama"
