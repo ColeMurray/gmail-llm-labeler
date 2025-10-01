@@ -130,9 +130,9 @@ def mock_openai_client():
     # Mock chat completion response
     mock_response = MagicMock()
     mock_response.choices = [MagicMock()]
-    mock_response.choices[
-        0
-    ].message.content = '{"category": "Work", "explanation": "Business related email"}'
+    mock_response.choices[0].message.content = (
+        '{"category": "Work", "explanation": "Business related email"}'
+    )
 
     mock_client.chat.completions.create.return_value = mock_response
 

@@ -192,9 +192,7 @@ class EmailAutoLabeler:
         mode_str = (
             "TEST MODE"
             if self.test_mode
-            else "PREVIEW MODE"
-            if self.preview_mode
-            else "PRODUCTION MODE"
+            else "PREVIEW MODE" if self.preview_mode else "PRODUCTION MODE"
         )
         source_str = "Gmail API" if use_gmail_api else "Database"
 

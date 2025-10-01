@@ -65,9 +65,9 @@ class TestLLMService:
         email_content = "Meeting tomorrow at 2 PM with the development team."
         expected_response = {"category": "Work", "explanation": "Business meeting notification"}
 
-        mock_openai_client.chat.completions.create.return_value.choices[
-            0
-        ].message.content = json.dumps(expected_response)
+        mock_openai_client.chat.completions.create.return_value.choices[0].message.content = (
+            json.dumps(expected_response)
+        )
 
         category, explanation = real_llm_service.categorize_email(email_content)
 
@@ -85,9 +85,9 @@ class TestLLMService:
         long_content = "A" * 3000  # Long content to test truncation
         expected_response = {"category": "Other", "explanation": "Test"}
 
-        mock_openai_client.chat.completions.create.return_value.choices[
-            0
-        ].message.content = json.dumps(expected_response)
+        mock_openai_client.chat.completions.create.return_value.choices[0].message.content = (
+            json.dumps(expected_response)
+        )
 
         # Create service with custom max_content_length
         llm_service = LLMService(
@@ -106,9 +106,9 @@ class TestLLMService:
     def test_categorize_email_invalid_json_response(self, real_llm_service, mock_openai_client):
         """Test handling invalid JSON response from LLM."""
         email_content = "Test email content"
-        mock_openai_client.chat.completions.create.return_value.choices[
-            0
-        ].message.content = "Invalid JSON"
+        mock_openai_client.chat.completions.create.return_value.choices[0].message.content = (
+            "Invalid JSON"
+        )
 
         category, explanation = real_llm_service.categorize_email(email_content)
 
@@ -120,9 +120,9 @@ class TestLLMService:
         email_content = "Test email content"
         incomplete_response = {"category": "Work"}  # Missing explanation
 
-        mock_openai_client.chat.completions.create.return_value.choices[
-            0
-        ].message.content = json.dumps(incomplete_response)
+        mock_openai_client.chat.completions.create.return_value.choices[0].message.content = (
+            json.dumps(incomplete_response)
+        )
 
         # Create LLMService with mocked client
         llm_service = LLMService(
@@ -160,9 +160,9 @@ class TestLLMService:
         email_content = "Test email content"
         response = {"category": "InvalidCategory", "explanation": "Test explanation"}
 
-        mock_openai_client.chat.completions.create.return_value.choices[
-            0
-        ].message.content = json.dumps(response)
+        mock_openai_client.chat.completions.create.return_value.choices[0].message.content = (
+            json.dumps(response)
+        )
 
         # Create LLMService with mocked client
         llm_service = LLMService(
@@ -213,9 +213,9 @@ class TestLLMService:
     def test_categorize_various_emails(self, mock_openai_client, content, expected_category):
         """Test categorizing various types of emails."""
         response = {"category": expected_category, "explanation": "Test explanation"}
-        mock_openai_client.chat.completions.create.return_value.choices[
-            0
-        ].message.content = json.dumps(response)
+        mock_openai_client.chat.completions.create.return_value.choices[0].message.content = (
+            json.dumps(response)
+        )
 
         # Create LLMService with mocked client
         llm_service = LLMService(
@@ -235,9 +235,9 @@ class TestLLMService:
         email_content = "Project deadline reminder"
         expected_response = {"category": "Work", "explanation": "Business related"}
 
-        mock_openai_client.chat.completions.create.return_value.choices[
-            0
-        ].message.content = json.dumps(expected_response)
+        mock_openai_client.chat.completions.create.return_value.choices[0].message.content = (
+            json.dumps(expected_response)
+        )
 
         with patch("email_labeler.llm_service.LLM_SERVICE", "Ollama"), patch(
             "email_labeler.llm_service.GPT_OSS_REASONING", "medium"
@@ -263,9 +263,9 @@ class TestLLMService:
         """Test categorizing empty email content."""
         empty_content = ""
         response = {"category": "Other", "explanation": "Empty email"}
-        mock_openai_client.chat.completions.create.return_value.choices[
-            0
-        ].message.content = json.dumps(response)
+        mock_openai_client.chat.completions.create.return_value.choices[0].message.content = (
+            json.dumps(response)
+        )
 
         # Create LLMService with mocked client
         llm_service = LLMService(
