@@ -9,6 +9,7 @@ from email_labeler.llm_service import LLMService
 
 # Test categories for all tests
 TEST_CATEGORIES = ["Marketing", "Work", "Personal", "Bills", "Newsletters", "Other"]
+TEST_MAX_CONTENT_LENGTH = 2000
 
 
 class TestLLMService:
@@ -17,11 +18,17 @@ class TestLLMService:
     def test_init_with_client(self, mock_openai_client):
         """Test initialization with provided client."""
         model = "gpt-4"
-        service = LLMService(categories=TEST_CATEGORIES, llm_client=mock_openai_client, model=model)
+        service = LLMService(
+            categories=TEST_CATEGORIES,
+            max_content_length=TEST_MAX_CONTENT_LENGTH,
+            llm_client=mock_openai_client,
+            model=model,
+        )
 
         assert service.llm_client == mock_openai_client
         assert service.model == model
         assert service.categories == TEST_CATEGORIES
+        assert service.max_content_length == TEST_MAX_CONTENT_LENGTH
 
     def test_init_without_client_openai(self):
         """Test initialization without client for OpenAI."""
@@ -30,7 +37,9 @@ class TestLLMService:
         ), patch("email_labeler.llm_service.OPENAI_MODEL", "gpt-3.5-turbo"), patch(
             "email_labeler.llm_service.OpenAI"
         ) as mock_openai:
-            service = LLMService(categories=TEST_CATEGORIES)
+            service = LLMService(
+                categories=TEST_CATEGORIES, max_content_length=TEST_MAX_CONTENT_LENGTH
+            )
 
             mock_openai.assert_called_once_with(api_key="test-key")
             assert service.model == "gpt-3.5-turbo"
@@ -42,7 +51,9 @@ class TestLLMService:
         ), patch("email_labeler.llm_service.OLLAMA_MODEL", "llama2"), patch(
             "email_labeler.llm_service.OpenAI"
         ) as mock_openai:
-            service = LLMService(categories=TEST_CATEGORIES)
+            service = LLMService(
+                categories=TEST_CATEGORIES, max_content_length=TEST_MAX_CONTENT_LENGTH
+            )
 
             mock_openai.assert_called_once_with(
                 base_url="http://localhost:11434/v1", api_key="ollama"
@@ -69,7 +80,7 @@ class TestLLMService:
         assert call_args[1]["model"] == "gpt-3.5-turbo"
         assert "messages" in call_args[1]
 
-    def test_categorize_email_truncation(self, real_llm_service, mock_openai_client):
+    def test_categorize_email_truncation(self, mock_openai_client):
         """Test email content truncation for long emails."""
         long_content = "A" * 3000  # Long content to test truncation
         expected_response = {"category": "Other", "explanation": "Test"}
@@ -78,13 +89,19 @@ class TestLLMService:
             0
         ].message.content = json.dumps(expected_response)
 
-        with patch("email_labeler.llm_service.MAX_CONTENT_LENGTH", 2000):
-            real_llm_service.categorize_email(long_content)
+        # Create service with custom max_content_length
+        llm_service = LLMService(
+            categories=TEST_CATEGORIES,
+            max_content_length=2000,
+            llm_client=mock_openai_client,
+            model="gpt-3.5-turbo",
+        )
+        llm_service.categorize_email(long_content)
 
-            call_args = mock_openai_client.chat.completions.create.call_args
-            content_in_prompt = call_args[1]["messages"][1]["content"]
-            # Should contain truncated content marker
-            assert "[Email truncated for processing]" in content_in_prompt
+        call_args = mock_openai_client.chat.completions.create.call_args
+        content_in_prompt = call_args[1]["messages"][1]["content"]
+        # Should contain truncated content marker
+        assert "[Email truncated for processing]" in content_in_prompt
 
     def test_categorize_email_invalid_json_response(self, real_llm_service, mock_openai_client):
         """Test handling invalid JSON response from LLM."""
@@ -109,7 +126,10 @@ class TestLLMService:
 
         # Create LLMService with mocked client
         llm_service = LLMService(
-            categories=TEST_CATEGORIES, llm_client=mock_openai_client, model="gpt-3.5-turbo"
+            categories=TEST_CATEGORIES,
+            max_content_length=TEST_MAX_CONTENT_LENGTH,
+            llm_client=mock_openai_client,
+            model="gpt-3.5-turbo",
         )
 
         category, explanation = llm_service.categorize_email(email_content)
@@ -124,7 +144,10 @@ class TestLLMService:
 
         # Create LLMService with mocked client
         llm_service = LLMService(
-            categories=TEST_CATEGORIES, llm_client=mock_openai_client, model="gpt-3.5-turbo"
+            categories=TEST_CATEGORIES,
+            max_content_length=TEST_MAX_CONTENT_LENGTH,
+            llm_client=mock_openai_client,
+            model="gpt-3.5-turbo",
         )
 
         category, explanation = llm_service.categorize_email(email_content)
@@ -143,7 +166,10 @@ class TestLLMService:
 
         # Create LLMService with mocked client
         llm_service = LLMService(
-            categories=TEST_CATEGORIES, llm_client=mock_openai_client, model="gpt-3.5-turbo"
+            categories=TEST_CATEGORIES,
+            max_content_length=TEST_MAX_CONTENT_LENGTH,
+            llm_client=mock_openai_client,
+            model="gpt-3.5-turbo",
         )
 
         category, explanation = llm_service.categorize_email(email_content)
@@ -156,7 +182,9 @@ class TestLLMService:
         with patch("email_labeler.llm_service.LLM_SERVICE", "OpenAI"), patch(
             "email_labeler.llm_service.OPENAI_API_KEY", "test-key"
         ), patch("email_labeler.llm_service.OpenAI") as mock_openai:
-            service = LLMService(categories=TEST_CATEGORIES)
+            service = LLMService(
+                categories=TEST_CATEGORIES, max_content_length=TEST_MAX_CONTENT_LENGTH
+            )
             service._get_llm_client()
 
             mock_openai.assert_called_with(api_key="test-key")
@@ -166,7 +194,9 @@ class TestLLMService:
         with patch("email_labeler.llm_service.LLM_SERVICE", "Ollama"), patch(
             "email_labeler.llm_service.OLLAMA_BASE_URL", "http://localhost:11434/v1"
         ), patch("email_labeler.llm_service.OpenAI") as mock_openai:
-            service = LLMService(categories=TEST_CATEGORIES)
+            service = LLMService(
+                categories=TEST_CATEGORIES, max_content_length=TEST_MAX_CONTENT_LENGTH
+            )
             service._get_llm_client()
 
             mock_openai.assert_called_with(base_url="http://localhost:11434/v1", api_key="ollama")
@@ -189,7 +219,10 @@ class TestLLMService:
 
         # Create LLMService with mocked client
         llm_service = LLMService(
-            categories=TEST_CATEGORIES, llm_client=mock_openai_client, model="gpt-3.5-turbo"
+            categories=TEST_CATEGORIES,
+            max_content_length=TEST_MAX_CONTENT_LENGTH,
+            llm_client=mock_openai_client,
+            model="gpt-3.5-turbo",
         )
 
         category, explanation = llm_service.categorize_email(content)
@@ -211,7 +244,10 @@ class TestLLMService:
         ):
             # Create LLMService with mocked client - use a gpt-oss model to trigger reasoning
             llm_service = LLMService(
-                categories=TEST_CATEGORIES, llm_client=mock_openai_client, model="gpt-oss-instruct"
+                categories=TEST_CATEGORIES,
+                max_content_length=TEST_MAX_CONTENT_LENGTH,
+                llm_client=mock_openai_client,
+                model="gpt-oss-instruct",
             )
 
             llm_service.categorize_email(email_content)
@@ -233,7 +269,10 @@ class TestLLMService:
 
         # Create LLMService with mocked client
         llm_service = LLMService(
-            categories=TEST_CATEGORIES, llm_client=mock_openai_client, model="gpt-3.5-turbo"
+            categories=TEST_CATEGORIES,
+            max_content_length=TEST_MAX_CONTENT_LENGTH,
+            llm_client=mock_openai_client,
+            model="gpt-3.5-turbo",
         )
 
         category, explanation = llm_service.categorize_email(empty_content)
@@ -245,7 +284,10 @@ class TestLLMService:
         """Test logging of LLM interactions."""
         # Create LLMService with mocked client
         llm_service = LLMService(
-            categories=TEST_CATEGORIES, llm_client=mock_openai_client, model="gpt-3.5-turbo"
+            categories=TEST_CATEGORIES,
+            max_content_length=TEST_MAX_CONTENT_LENGTH,
+            llm_client=mock_openai_client,
+            model="gpt-3.5-turbo",
         )
 
         with patch("builtins.open", create=True) as mock_open, patch(
@@ -262,7 +304,12 @@ class TestLLMService:
 
         for model in models:
             mock_client = MagicMock()
-            service = LLMService(categories=TEST_CATEGORIES, llm_client=mock_client, model=model)
+            service = LLMService(
+                categories=TEST_CATEGORIES,
+                max_content_length=TEST_MAX_CONTENT_LENGTH,
+                llm_client=mock_client,
+                model=model,
+            )
             assert service.model == model
 
     def test_timeout_handling(self, mock_openai_client):
@@ -274,7 +321,10 @@ class TestLLMService:
 
         # Create LLMService with mocked client
         llm_service = LLMService(
-            categories=TEST_CATEGORIES, llm_client=mock_openai_client, model="gpt-3.5-turbo"
+            categories=TEST_CATEGORIES,
+            max_content_length=TEST_MAX_CONTENT_LENGTH,
+            llm_client=mock_openai_client,
+            model="gpt-3.5-turbo",
         )
 
         category, explanation = llm_service.categorize_email(email_content)
@@ -293,7 +343,10 @@ class TestLLMService:
 
         # Create LLMService with mocked client
         llm_service = LLMService(
-            categories=TEST_CATEGORIES, llm_client=mock_openai_client, model="gpt-3.5-turbo"
+            categories=TEST_CATEGORIES,
+            max_content_length=TEST_MAX_CONTENT_LENGTH,
+            llm_client=mock_openai_client,
+            model="gpt-3.5-turbo",
         )
 
         category, explanation = llm_service.categorize_email(email_content)
@@ -307,6 +360,6 @@ class TestLLMService:
         with patch("email_labeler.llm_service.LLM_SERVICE", "UnsupportedService"), patch(
             "email_labeler.llm_service.OPENAI_API_KEY", "test-key"
         ), patch("email_labeler.llm_service.OpenAI") as mock_openai:
-            LLMService(categories=TEST_CATEGORIES)
+            LLMService(categories=TEST_CATEGORIES, max_content_length=TEST_MAX_CONTENT_LENGTH)
             # Should fall through to OpenAI case since it's not "Ollama"
             mock_openai.assert_called_with(api_key="test-key")

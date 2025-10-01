@@ -303,6 +303,7 @@ def real_llm_service(mock_openai_client, pipeline_config):
 
     return LLMService(
         categories=pipeline_config.transform.categories,
+        max_content_length=pipeline_config.transform.max_content_length,
         llm_client=mock_openai_client,
         model="gpt-3.5-turbo",
     )
