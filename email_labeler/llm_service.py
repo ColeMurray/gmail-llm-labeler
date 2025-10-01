@@ -4,12 +4,11 @@ import json
 import logging
 import time
 from datetime import datetime
-from typing import Tuple
+from typing import List, Tuple
 
 from openai import OpenAI
 
 from .config import (
-    CATEGORY_LABELS,
     ERROR_LOG_FILE,
     GPT_OSS_REASONING,
     LLM_LOG_FILE,
@@ -25,14 +24,22 @@ from .config import (
 class LLMService:
     """Handles email categorization using LLM (OpenAI or Ollama)."""
 
-    def __init__(self, llm_client: OpenAI = None, model: str = None, lazy_init: bool = False):
+    def __init__(
+        self,
+        categories: List[str],
+        llm_client: OpenAI = None,
+        model: str = None,
+        lazy_init: bool = False,
+    ):
         """Initialize the LLM client.
 
         Args:
+            categories: List of category labels for email classification.
             llm_client: Optional OpenAI client instance. If not provided, creates based on config.
             model: Optional model name. If not provided, uses config defaults.
             lazy_init: If True, delay LLM client initialization until first use.
         """
+        self.categories = categories
         self._lazy_init = lazy_init
         if llm_client is not None:
             self.llm_client = llm_client
@@ -115,7 +122,7 @@ class LLMService:
         # User prompt
         user_prompt = f"""Categorize this email into exactly ONE of these categories:
 
-{", ".join(CATEGORY_LABELS)}
+{", ".join(self.categories)}
 
 Email content:
 {email_content}
@@ -170,19 +177,19 @@ Respond with a JSON object:
         except json.JSONDecodeError:
             logging.warning("Failed to parse JSON response, attempting text extraction")
             # Fallback: try to extract category from text
-            for label in CATEGORY_LABELS:
+            for label in self.categories:
                 if label.lower() in response_text.lower():
                     logging.info(f"Extracted category '{label}' from non-JSON response")
                     return label, "Extracted from response"
             return "Other", "Failed to parse response"
 
         # Validate category
-        if category in CATEGORY_LABELS:
+        if category in self.categories:
             return category, explanation
         else:
             # Try fuzzy matching
             category_lower = category.lower()
-            for label in CATEGORY_LABELS:
+            for label in self.categories:
                 if label.lower() in category_lower or category_lower in label.lower():
                     logging.info(f"Fuzzy matched '{category}' to '{label}'")
                     return label, explanation

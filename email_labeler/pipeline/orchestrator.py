@@ -62,7 +62,9 @@ class EmailPipeline:
         if self.database is None:
             self.database = EmailDatabase()
         if self.llm_service is None:
-            self.llm_service = LLMService(lazy_init=True)
+            self.llm_service = LLMService(
+                categories=self.config.transform.categories, lazy_init=True
+            )
         if self.metrics_tracker is None:
             self.metrics_tracker = MetricsTracker()
 

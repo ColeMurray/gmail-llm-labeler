@@ -31,7 +31,7 @@ class TransformStage(PipelineStage):
         """
         super().__init__()
         self.config = config
-        self.llm_service = llm_service or LLMService()
+        self.llm_service = llm_service or LLMService(categories=config.categories)
         self.email_processor = email_processor or EmailProcessor()
 
     def execute(
