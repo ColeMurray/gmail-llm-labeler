@@ -13,7 +13,6 @@ from .config import (
     GPT_OSS_REASONING,
     LLM_LOG_FILE,
     LLM_SERVICE,
-    MAX_CONTENT_LENGTH,
     OLLAMA_BASE_URL,
     OLLAMA_MODEL,
     OPENAI_API_KEY,
@@ -27,6 +26,7 @@ class LLMService:
     def __init__(
         self,
         categories: List[str],
+        max_content_length: int = 4000,
         llm_client: OpenAI = None,
         model: str = None,
         lazy_init: bool = False,
@@ -35,11 +35,13 @@ class LLMService:
 
         Args:
             categories: List of category labels for email classification.
+            max_content_length: Maximum length of email content before truncation.
             llm_client: Optional OpenAI client instance. If not provided, creates based on config.
             model: Optional model name. If not provided, uses config defaults.
             lazy_init: If True, delay LLM client initialization until first use.
         """
         self.categories = categories
+        self.max_content_length = max_content_length
         self._lazy_init = lazy_init
         if llm_client is not None:
             self.llm_client = llm_client
@@ -74,11 +76,11 @@ class LLMService:
         """
         self._ensure_llm_client()
         # Truncate very long emails
-        if len(email_content) > MAX_CONTENT_LENGTH:
+        if len(email_content) > self.max_content_length:
             email_content = (
-                email_content[:MAX_CONTENT_LENGTH] + "\n[Email truncated for processing]"
+                email_content[: self.max_content_length] + "\n[Email truncated for processing]"
             )
-            logging.debug(f"Truncated email content to {MAX_CONTENT_LENGTH} characters")
+            logging.debug(f"Truncated email content to {self.max_content_length} characters")
 
         # Build messages
         messages = self._build_messages(email_content)

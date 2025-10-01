@@ -100,6 +100,7 @@ def create_email_processor(
 
 def create_llm_service(
     categories: list[str],
+    max_content_length: int = 4000,
     llm_client: Optional[OpenAI] = None,
     model: Optional[str] = None,
     service: str = LLM_SERVICE,
@@ -108,6 +109,7 @@ def create_llm_service(
 
     Args:
         categories: List of category labels for email classification.
+        max_content_length: Maximum length of email content before truncation.
         llm_client: Optional OpenAI client to inject.
         model: Optional model name override.
         service: LLM service type (used if llm_client is None).
@@ -119,11 +121,17 @@ def create_llm_service(
         llm_client = create_llm_client(service)
         if model is None:
             model = OLLAMA_MODEL if service == "Ollama" else OPENAI_MODEL
-    return LLMService(categories=categories, llm_client=llm_client, model=model)
+    return LLMService(
+        categories=categories,
+        max_content_length=max_content_length,
+        llm_client=llm_client,
+        model=model,
+    )
 
 
 def create_email_auto_labeler(
     categories: list[str],
+    max_content_length: int = 4000,
     database: Optional[EmailDatabase] = None,
     llm_service: Optional[LLMService] = None,
     email_processor: Optional[EmailProcessor] = None,
@@ -144,6 +152,7 @@ def create_email_auto_labeler(
 
     Args:
         categories: List of category labels for email classification.
+        max_content_length: Maximum length of email content before truncation.
         database: Optional EmailDatabase instance.
         llm_service: Optional LLMService instance.
         email_processor: Optional EmailProcessor instance.
@@ -162,7 +171,9 @@ def create_email_auto_labeler(
         database = create_email_database(database_file=database_file)
 
     if llm_service is None:
-        llm_service = create_llm_service(categories=categories, service=llm_service_type)
+        llm_service = create_llm_service(
+            categories=categories, max_content_length=max_content_length, service=llm_service_type
+        )
 
     if email_processor is None:
         email_processor = create_email_processor(port=gmail_port)
@@ -172,6 +183,7 @@ def create_email_auto_labeler(
 
     return EmailAutoLabeler(
         categories=categories,
+        max_content_length=max_content_length,
         database=database,
         llm_service=llm_service,
         email_processor=email_processor,
@@ -181,13 +193,14 @@ def create_email_auto_labeler(
     )
 
 
-def create_test_dependencies(categories: list[str] = None):
+def create_test_dependencies(categories: list[str] = None, max_content_length: int = 4000):
     """Create a set of test dependencies with in-memory database.
 
     This is useful for unit testing.
 
     Args:
         categories: Optional list of category labels. If not provided, uses defaults.
+        max_content_length: Maximum length of email content before truncation.
 
     Returns:
         Tuple of (database, llm_service, email_processor, metrics_tracker)
@@ -204,7 +217,12 @@ def create_test_dependencies(categories: list[str] = None):
 
     # Create mock LLM service (you could also use a mock client here)
     llm_client = create_llm_client("OpenAI")  # Or use a mock
-    llm_service = LLMService(categories=categories, llm_client=llm_client, model="gpt-3.5-turbo")
+    llm_service = LLMService(
+        categories=categories,
+        max_content_length=max_content_length,
+        llm_client=llm_client,
+        model="gpt-3.5-turbo",
+    )
 
     # Create email processor (you might want to mock the Gmail client)
     email_processor = EmailProcessor(gmail_client=None)  # Will create its own

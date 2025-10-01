@@ -229,7 +229,9 @@ class TestFactoryFunctions:
             assert labeler.categories == test_categories
             mock_create_db.assert_called_once_with(database_file=DATABASE_FILE)
             mock_create_processor.assert_called_once_with(port=8080)
-            mock_create_llm.assert_called_once_with(categories=test_categories, service=LLM_SERVICE)
+            mock_create_llm.assert_called_once_with(
+                categories=test_categories, max_content_length=4000, service=LLM_SERVICE
+            )
 
     def test_create_test_dependencies(self):
         """Test creating test dependencies."""

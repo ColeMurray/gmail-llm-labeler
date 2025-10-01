@@ -17,6 +17,7 @@ class EmailAutoLabeler:
     def __init__(
         self,
         categories: List[str],
+        max_content_length: int = 4000,
         database: EmailDatabase = None,
         llm_service: LLMService = None,
         email_processor: EmailProcessor = None,
@@ -28,6 +29,7 @@ class EmailAutoLabeler:
 
         Args:
             categories: List of category labels for email classification.
+            max_content_length: Maximum length of email content before truncation.
             database: Optional EmailDatabase instance. If not provided, creates a new one.
             llm_service: Optional LLMService instance. If not provided, creates a new one.
             email_processor: Optional EmailProcessor instance. If not provided, creates a new one.
@@ -36,12 +38,15 @@ class EmailAutoLabeler:
             preview_mode: Whether to run in preview mode.
         """
         self.categories = categories
+        self.max_content_length = max_content_length
         self.test_mode = test_mode
         self.preview_mode = preview_mode
 
         # Initialize components with dependency injection
         self.database = database or EmailDatabase()
-        self.llm_service = llm_service or LLMService(categories=categories)
+        self.llm_service = llm_service or LLMService(
+            categories=categories, max_content_length=max_content_length
+        )
         self.email_processor = email_processor or EmailProcessor()
         self.metrics = metrics_tracker or (MetricsTracker() if test_mode else None)
 

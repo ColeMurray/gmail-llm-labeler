@@ -188,11 +188,3 @@ OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
 OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434/v1")
 OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "llama3.1")
 GPT_OSS_REASONING = os.getenv("GPT_OSS_REASONING", "medium")
-
-# Email processing limits
-MAX_CONTENT_LENGTH = 4000
-DEFAULT_BATCH_SIZE = 100
-
-# Modes
-PREVIEW_MODE = False
-TEST_MODE = False
